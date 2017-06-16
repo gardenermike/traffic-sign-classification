@@ -1,17 +1,13 @@
 # **Traffic Sign Recognition** 
 
-## Writeup Template
-
-### You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
 ---
 
 **Build a Traffic Sign Recognition Project**
 
 The goals / steps of this project are the following:
-* Load the data set (see below for links to the project data set)
+* Load the German Traffic Signs data set (see details [here](http://benchmark.ini.rub.de/?section=gtsrb&subsection=dataset))
 * Explore, summarize and visualize the data set
-* Design, train and test a model architecture
+* Design, train and test a model architecture to classify the signs, especially to generalize outside the dataset
 * Use the model to make predictions on new images
 * Analyze the softmax probabilities of the new images
 * Summarize the results with a written report
@@ -19,24 +15,30 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./examples/visualization.jpg "Visualization"
-[image2]: ./examples/grayscale.jpg "Grayscaling"
-[image3]: ./examples/random_noise.jpg "Random Noise"
-[image4]: ./examples/placeholder.png "Traffic Sign 1"
-[image5]: ./examples/placeholder.png "Traffic Sign 2"
-[image6]: ./examples/placeholder.png "Traffic Sign 3"
-[image7]: ./examples/placeholder.png "Traffic Sign 4"
-[image8]: ./examples/placeholder.png "Traffic Sign 5"
+[image1]: ./examples/image_group.png "Sampling of dataset"
+[image3]: ./examples/random_noise.jpg "Augmented sample"
+[image4]: ./german_traffic_signs/100.jpeg "Traffic Sign 1"
+[image5]: ./german_traffic_signs/70.jpeg "Traffic Sign 2"
+[image6]: ./german_traffic_signs/construction.jpeg "Traffic Sign 3"
+[image7]: ./german_traffic_signs/do_not_enter.jpeg "Traffic Sign 4"
+[image8]: ./german_traffic_signs/high_water.jpeg "Traffic Sign 5"
+[image9]: ./german_traffic_signs/hills.jpeg "Traffic Sign 6"
+[image10]: ./german_traffic_signs/kindergarten.jpeg "Traffic Sign 7"
+[image11]: ./german_traffic_signs/right_turn.jpeg "Traffic Sign 8"
+[image12]: ./german_traffic_signs/roundabout.jpeg "Traffic Sign 9"
+[image13]: ./german_traffic_signs/stop.jpeg "Traffic Sign 10"
+[image14]: ./german_traffic_signs/water_on_road.jpeg "Traffic Sign 11"
+[image15]: ./german_traffic_signs/yellow_diamond.jpeg "Traffic Sign 12"
+[image16]: ./german_traffic_signs/yield.jpeg "Traffic Sign 13"
 
 ## Rubric Points
 ###Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/481/view) individually and describe how I addressed each point in my implementation.  
 
 ---
-### Writeup / README
+### Code
 
-#### 1. Provide a Writeup / README that includes all the rubric points and how you addressed each one. You can submit your writeup as markdown or pdf. You can use this template as a guide for writing the report. The submission includes the project code.
-
-You're reading it! and here is a link to my [project code](https://github.com/udacity/CarND-Traffic-Sign-Classifier-Project/blob/master/Traffic_Sign_Classifier.ipynb)
+You can access and download an Jupyter notebook with all of the code [here](https://github.com/gardenermike/traffic-sign-classification/blob/master/Traffic_Sign_Classifier.ipynb)
+Feel free to download and try it out yourself! The data will have to be downloaded separately, as it is too large to be kept inside this project. I used the preprocessed dataset provided by Udacity.
 
 ### Data Set Summary & Exploration
 
@@ -51,9 +53,9 @@ signs data set:
 * The shape of a traffic sign image is ?
 * The number of unique classes/labels in the data set is ?
 
-#### 2. Include an exploratory visualization of the dataset.
+#### 2. Sampling of dataset
 
-Here is an exploratory visualization of the data set. It is a bar chart showing how the data ...
+Here is a random sampling of images from the dataset. Note the variety of lighting conditions and angles.
 
 ![alt text][image1]
 
