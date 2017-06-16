@@ -19,6 +19,7 @@ Along with the model, there is also code to:
 [//]: # (Image References)
 
 [image1]: ./examples/image_group.png "Sampling of dataset"
+[image2]: ./examples/activation.png "Activation visualization"
 [image3]: ./examples/augmented_image_group.png "Augmented sample"
 [image4]: ./german_traffic_signs/100.jpeg "Traffic Sign 1"
 [image5]: ./german_traffic_signs/70.jpeg "Traffic Sign 2"
@@ -32,7 +33,7 @@ Along with the model, there is also code to:
 [image13]: ./german_traffic_signs/stop.jpeg "Traffic Sign 10"
 [image14]: ./german_traffic_signs/water_on_road.jpeg "Traffic Sign 11"
 [image15]: ./german_traffic_signs/yellow_diamond.jpeg "Traffic Sign 12"
-[image16]: ./german_traffic_signs/yield.jpeg "Traffic Sign 13" 
+[image16]: ./german_traffic_signs/yield.jpeg "Traffic Sign 13"
 
 ---
 ### Code
@@ -60,8 +61,6 @@ Here is a random sampling of images from the dataset. Note the variety of lighti
 ![Random sample][image1]
 
 ### Design and Test a Model Architecture
-
-#### 1. Describe how you preprocessed the image data. What techniques were chosen and why did you choose these techniques? Consider including images showing the output of each preprocessing technique. Pre-processing refers to techniques such as converting to grayscale, normalization, etc. (OPTIONAL: As described in the "Stand Out Suggestions" part of the rubric, if you generated additional data for training, describe why you decided to generate additional data, how you generated the data, and provide example images of the additional data. Then describe the characteristics of the augmented training set like number of images in the set, number of images for each class, etc.)
 
 #### 1. Preprocessing: Normalization
 
@@ -160,10 +159,15 @@ My final model results were:
 * test set accuracy of 93.1%
 
 Looks great, right? As mentioned above, that wasn't my first try. I started with a LeNet-type architecture which got me up near 88%. I then played around with the ideas from GoogLeNet/Inception, which I'd been wanting to try for a while. I started with four convolutional layers in each of the three paths, but training was slow, and I found that the results weren't meaningfully better. I slowly raised my epoch count to 32 and got 93% accuracy, and thought everything was great. In particular, I noticed that I didn't have a bad overfitting problem, as my validation set accuracy tracked or exceeded the test set accuracy during most of the training. I *did* have overfitting issues on my first architecture, as the training accuracy jumped to 100% quickly, with the validation accuracy trailing behind.
+
 Testing against novel images from the web, though, I found that my accuracy was terrible: around 30%. I had a hunch that the biggest problem was that the real images were not nicely centered. The images that *were* centered (see the "do not enter" image below) did fine.
+
 So... I tried the data augmentation. And training was _much_ slower. I trained several times with increasing epochs, falling a bit short until I got up to 120 epochs. Training that long took about a day on an AWS p2 GPU instance (I used a spot instance to reduce the price to a reasonable level). The work paid off: the new approach generalized well to my web images.
 I used dropout based on previous experience, and I didn't spend a lot of time tuning it, as I found strong resistance to overfitting with my first pass.
+
 I suspect I could have reduced the size of my model quite a bit and still gotten pretty good results. I wanted to push it hard, though. I am going to run another pass with the epochs pushed up by 50% and see just how far I can push up the accuracy.
+
+I also experimented with several activation types. I used the standard [ReLU](https://en.wikipedia.org/wiki/Rectifier_(neural_networks)), which did work fine (I tested with around 10 epochs with various activations to compare performance). I also used [ELU](http://image-net.org/challenges/posters/JKU_EN_RGB_Schwarz_poster.pdf), leaky relu, and tried out self-normalizing [SELU](https://arxiv.org/abs/1706.02515) activations from a paper I found while scanning through arxiv. I noticed tht the SELU activation had the least tendency to overfit, but led to very slow training beyond around 90% accuracy. Since overfitting wasn't much a problem with dropout that I used, I went back to (leaky) ReLU. 
  
 
 ### Test a Model on New Images
@@ -184,35 +188,62 @@ I tried to be a bit tricky, with duplicate/multiple signs and signs well off cen
 
 Here are the results of the prediction:
 
-| Image			        |     Prediction	        					| 
+| Image			        |     Prediction	        					|
 |:---------------------:|:---------------------------------------------:| 
-| Stop Sign      		| Stop sign   									| 
-| U-turn     			| U-turn 										|
-| Yield					| Yield											|
-| 100 km/h	      		| Bumpy Road					 				|
-| Slippery Road			| Slippery Road      							|
+| High water      		| No vehicles (correct classification)   									|
+| 70km/hr     			| 100km/hr 										|
+| Roundabout					| Roundabout											|
+| Road work	      		| Road work					 				|
+| Stop			| No entry      							|
+| Bumpy road | Bumpy road |
+| 100km/hr | Priority road |
+| Right-of-way at intersection | Right-of-way at intersection |
+| Priority road | Priority road |
+| Pedestrians | Pedestrians |
+| Right turn ahead | Right turn ahead |
+| Yield | Yield |
+| No entry | No entry |
+
+The model was able to correctly categorize 10 of the 13 traffic signs, which gives an accuracy of 77%.
+The failures are all interesting.
+* The 70km/hour sign was nearly predicted, but the resolution of the characters at 32x32 pixels may not have been sufficient.
+* The stop sign failure suggests that a white bar on a red background is hard for the model to distinguish between stop and do not enter. Investigtion below shows that predictions were at 30% for do not enter vs 25% for stop, so this was a near-miss.
+* The 100km/hr sign was just completely wrong. Since the sign was a very small portion of the 32x32 image, it appears that the model tried to look at other features in the image. Note the top-5 predictions were all below 10%. The model was lost here.
+
+#### 3. Softmax likelihood.
+
+Cell 31 in the notebook has code, details, and images detailing the top-5 predictions for each image. I'll provide a quick summary here of the top softmax probability for each image.
 
 
-The model was able to correctly guess 4 of the 5 traffic signs, which gives an accuracy of 80%. This compares favorably to the accuracy on the test set of ...
-
-#### 3. Describe how certain the model is when predicting on each of the five new images by looking at the softmax probabilities for each prediction. Provide the top 5 softmax probabilities for each image along with the sign type of each probability. (OPTIONAL: as described in the "Stand Out Suggestions" part of the rubric, visualizations can also be provided such as bar charts)
-
-The code for making predictions on my final model is located in the 11th cell of the Ipython notebook.
-
-For the first image, the model is relatively sure that this is a stop sign (probability of 0.6), and the image does contain a stop sign. The top five soft max probabilities were
-
-| Probability         	|     Prediction	        					| 
+| Image			        |     Percentage	        					|
 |:---------------------:|:---------------------------------------------:| 
-| .60         			| Stop sign   									| 
-| .20     				| U-turn 										|
-| .05					| Yield											|
-| .04	      			| Bumpy Road					 				|
-| .01				    | Slippery Road      							|
+| High water      		| 53%   									|
+| 70km/hr     			| 17% 										|
+| Roundabout					| 63%											|
+| Road work	      		| ~100%					 				|
+| Stop			| 30%      							|
+| Bumpy road | 61% |
+| 100km/hr | 7% |
+| Right-of-way at intersection | 90% |
+| Priority road | ~100% |
+| Pedestrians | 21% |
+| Right turn ahead | 43% |
+| Yield | ~100% |
+| No entry | 99% |
 
 
-For the second image ... 
+There aren't many surprises here. I see two strong patterns: signs making up most of the image received a much stronger predictive strength from the model. Interestingly, triangular signs seemed to fare better than round signs.
+The right turn sign is an interesting outlier to me. The model was not especially confident in its prediction, even though the sign is well centered and clear to me as a human. The other predictions are all similar: left turn, roundabout, and so on. Apparently the model learned the general concept of a turn sign.
+The 100km/hr sign, as discussed above, was just not found by the model at all, probably due to the small size of the sign in the image.
 
-### (Optional) Visualizing the Neural Network (See Step 4 of the Ipython notebook for more details)
-#### 1. Discuss the visual output of your trained network's feature maps. What characteristics did the neural network use to make classifications?
+### Visualizing the Neural Network
+
+![activation][image2]
+
+To get a visualization of what the network was doing, I trained a small, quickly trained image with no pooling or strides to reduce the image size. I output the results from each filter at each layer of the image on a "no entry" sign, as I knew from my previous analysis that "no entry" signs were strongly classified.
+
+See cell 56 (the final cell) in the notebook for a full visualization.
+I expected to see a higher level of abstraction between layers, with unrecognizable features early on and strong sign signatures later on. Instead, I found that each filter in each layer responded similarly. There were subtle differences, however: some focused on the center line, some on the circle, some on the top of the center line, some the bottom, and so on.
+I suspect that a deeper network would have resulted in more of the abstraction between layers that I expected, as can be seen in visualizations like [these](http://yosinski.com/deepvis).
 
 
